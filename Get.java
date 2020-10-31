@@ -5,9 +5,13 @@ import java.util.Scanner;
 public class Get {
 	boolean printDebuggin;
 	String bodyContentFile;
-	Get(boolean debug){
+	Response response;
+	String listOfFile;
+	Get(boolean debug, Response res){
 		printDebuggin = debug;
 		bodyContentFile = "";
+		response = res;
+		listOfFile = "";
 	}
 	
 	public int doAction(File wanted, boolean found, File rootFile) {
@@ -25,6 +29,7 @@ public class Get {
 						statusCode = 0;
 						System.out.println("Print contents");
 						bodyContentFile = getFileContents(wanted.getPath());
+						response.headers = "Content-Length:" + bodyContentFile.length() +"\r\n" + response.headers + bodyContentFile;
 				//		System.out.println(body);
 					}else {
 						statusCode = 4;
@@ -52,15 +57,19 @@ public class Get {
 			if(firstTime) {
 				empty = false;
 				firstTime = false;
-				System.out.println("List of current files inside the direcerty you specify");
+				listOfFile += "List of current files inside the direcerty you specify\n";
+				//System.out.println("List of current files inside the direcerty you specify");
 			}
 			if(fiTemp.isFile()) {
-				System.out.println(fiTemp.getName());
+				listOfFile +=fiTemp.getName() + "\n";
+				//System.out.println(fiTemp.getName());
 			}				
 		}
 		if(empty) {
-			System.out.println("There is no any file here");
+			listOfFile +="There is no any file here\n";
+			//System.out.println("There is no any file here");
 		}
+		response.headers = "Content-Length:" + listOfFile.length() +"\r\n" + response.headers + listOfFile;
 	}
 	
 	public String getFileContents(String directory) {

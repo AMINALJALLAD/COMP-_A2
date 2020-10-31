@@ -162,11 +162,12 @@ public class Httpf {
 					System.out.println("Do action hs finished");
 					System.out.println("\nthe response is \n" + httpf.response.getResponse());
 					outStream.print(httpf.response.getResponse());
-					server.close();
+					outStream.flush();
+				//	server.close();
 				}else {
 					System.out.println("Sorry no action");
 					httpf.response.setRequest(httpf.requestServer.version, 3);
-					server.close();
+				//	server.close();
 				}
 				System.out.println(" is valid " + valid);
 				System.out.println("Do you need more : ['y'] for yes. Otherwise, it will stop the program");

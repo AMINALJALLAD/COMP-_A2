@@ -193,11 +193,17 @@ public class Request  {
 //			System.out.println("validLine is " + validLine);
 //			System.out.println("validHeaders is " + validHeaders);
 //			System.out.println("requestLineDone is " + requestLineDone);
+//			System.out.println("headers before " + headers.length());
+//			
+//			headers = headers.substring(0, headers.length()-2);
+//			System.out.println("**************************************************************");
+//			System.out.println("headers after"
+//					+ " " + headers.length());
 			if(requestType.equals("POST")) { 
 				if(printDebugging) {
 					System.out.println("We need to scan the body from post request");
 				}
-				int readChar = bodyChar + 1;
+				int readChar = bodyChar ;
 				charNum = buffer.read();
 //				System.out.println("readChar is " + readChar);
 //				System.out.println("charNum is " + charNum);
@@ -283,10 +289,19 @@ public class Request  {
 				if(!validPath) {  // first char is not '/'
 					break;
 				}
-				token = st.nextToken("/");
-				if(token.length() > 0) {
+				
+				if(urlPath.length() > 0) {
+					token = st.nextToken("/");
+					System.out.println("add to path");
 					paths.add(token);
+				}else {
+					System.out.println("Don't tawfiq");
+					token = st.nextToken();
 				}
+				
+//				if(token.length() > 0) {
+//					paths.add(token);
+//				}
 			}
 			System.out.println(paths);
 		//}
@@ -347,20 +362,15 @@ public class Request  {
 		rootFile = new File(absouteUrl);
 		wanted = findFileDirectory(rootFile,paths,0);
 		int statusCode = -1;
+		response.addHeaders(headers);
 		if(requestType.equals("GET")) {
-			getRequest = new Get(printDebugging);
+			getRequest = new Get(printDebugging, response);
 			statusCode = getRequest.doAction(wanted, found, rootFile);
 		}else {
 			postRequest = new Post(printDebugging);
 			statusCode = postRequest.doAction(wanted, found, rootFile, bodyRequest, indexOf, paths);
 		}
 		response.setRequest(version, statusCode);
-		if(version.equals("GET") && (statusCode == 0)) {
-			headers += "Content-Length:" + getRequest.bodyContentFile.length() +"\r\n\r\n" + getRequest.bodyContentFile;
-			response.addHeaders(headers);
-		}else {
-			response.addHeaders(headers);
-		}
 	}
 	
 
@@ -504,3 +514,4 @@ public class Request  {
 
 
 //curl localhost:8080/POST/hello.txt -d "data to be posted"
+//curl -X POST localhost:8080/Comp339/New_folder/Lesson1/Private_file.txt -d 'to be posted'
