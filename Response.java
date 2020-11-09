@@ -12,7 +12,7 @@ public class Response {
 	public void setRequest(String version, int statCode) {
 		String statusString = "";
 		if(version != null) {
-			statusLine = "version ";
+			statusLine = version + " ";
 		}
 		statusString = getStatus(statCode);
 		statusLine += statusString;

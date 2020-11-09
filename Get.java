@@ -1,6 +1,8 @@
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.StringTokenizer;
 
 public class Get {
 	boolean printDebuggin;
@@ -27,8 +29,14 @@ public class Get {
 							System.out.println("It is possible to read from this file");
 						}
 						statusCode = 0;
-						System.out.println("Print contents");
+						if(printDebuggin) {
+							System.out.println("Print contents");
+						}
 						bodyContentFile = getFileContents(wanted.getPath());
+						String newHeaders = changeContentType(wanted);
+						if(newHeaders.length() > 0) {
+							response.headers = newHeaders + response.headers;
+						}
 						response.headers = "Content-Length:" + bodyContentFile.length() +"\r\n" + response.headers + bodyContentFile;
 				//		System.out.println(body);
 					}else {
@@ -47,6 +55,54 @@ public class Get {
 		}else {
 			listFiles(rootFile);
 			statusCode = 0;
+		}
+		return statusCode; 
+	}
+	
+	public int doAction(File wanted, boolean found, File rootFile, ArrayList<String> paths) { // after submission
+		int statusCode = -1;
+		if(wanted != null) {
+			if(found) {
+				if(wanted.isDirectory()) {
+					listFiles(wanted);
+					statusCode = 0;
+				}else {
+					if(wanted.canRead()) {
+						if(printDebuggin) {
+							System.out.println("It is possible to read from this file");
+						}
+						statusCode = 0;
+						if(printDebuggin) {
+							System.out.println("Print contents");
+						}
+						bodyContentFile = getFileContents(wanted.getPath());
+						String newHeaders = changeContentType(wanted);
+						if(newHeaders.length() > 0) {
+							response.headers = newHeaders + response.headers;
+						}
+						response.headers = "Content-Length:" + bodyContentFile.length() +"\r\n" + response.headers + bodyContentFile;
+				//		System.out.println(body);
+					}else {
+						statusCode = 4;
+						if(printDebuggin) {
+							System.out.println("You can't read from this file");
+						}
+					}
+				}
+			}else {
+					if(printDebuggin) {
+						System.out.println("We don't have such file");
+					}
+					statusCode = 1;
+				}
+		}else {
+			if(paths.size() == 0) {
+				listFiles(rootFile);
+				statusCode = 0;
+			}else {
+				statusCode = 1;
+			}
+			
 		}
 		return statusCode; 
 	}
@@ -87,6 +143,31 @@ public class Get {
 		return body;
 	}
 	
-	
-	
+	private String changeContentType(File file) 
+	{
+		String fileType = "";
+		String headersNew = "";
+		int ind = file.getName().lastIndexOf('.');
+//		if(ind > 0) {
+//			fileType = fileType.substring(0, ind+1);
+//		}
+		
+		StringTokenizer st = new StringTokenizer(file.getName());
+		while(st.hasMoreTokens()) {
+			fileType = st.nextToken(".");
+			//System.out.println(fileType);
+		}
+		
+		if (fileType.equals("txt"))
+		{
+			headersNew = "Content-Type : text/html; charset=utf-8\r\n";     		
+			headersNew += "Content-Disposition: attachment; filename= " + fileType;      
+		}
+		return headersNew;
+	}
+
 }
+	
+	
+	
+

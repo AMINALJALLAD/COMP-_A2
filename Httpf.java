@@ -65,6 +65,16 @@ public class Httpf {
 		System.out.println("Sory. It is in vaild input");
 	}
 	
+	public void clear() {  // after submission
+		response = new Response();
+		requestServer = new Request(response);
+//		status = new boolean[5];
+		help = new Help();
+		portNumberServer = 8080;
+		directry = "C:\\Users\\aalja\\OneDrive\\Desktop\\COMPP445\\A2_comp445\\LocalHost";
+		requestServer.clear(response);
+	}
+	
 	public boolean validation(String input) {
 		boolean valid = true;
 		StringTokenizer st = new StringTokenizer(input);
@@ -139,28 +149,32 @@ public class Httpf {
 		while(needMore == 'y') {
 			try {
 				input = key.nextLine();
-				httpf.requestServer.setAbsolutePath(httpf.directry);
 				if(!httpf.validation(input)) {
 					continue;
 				} else if(!httpf.validatePortNumber(httpf.portNumberServer)) {
 					System.out.println("Sorry. You can't use this portNumber " + httpf.portNumberServer);
 					continue;
 				}
-				System.out.println("here"
-						+ "");
+				httpf.clear(); // after submission
+				httpf.requestServer.setAbsolutePath(httpf.directry);
+			//	System.out.println("here"	+ "");
 				System.out.println("portNumber " + httpf.portNumberServer);
 				server = new ServerSocket(httpf.portNumberServer, 0, InetAddress.getLoopbackAddress());
-				System.out.println("here2");
+			//	System.out.println("here2");
 				client = server.accept();
-				System.out.println("here");
+			//	System.out.println("here");
 				buffer = new BufferedReader(new InputStreamReader(client.getInputStream()));
 				outStream = new PrintWriter(client.getOutputStream());
 				boolean valid = httpf.requestServer.isValidRequest(buffer);
 				if(valid) {
-					System.out.println("Do action now");
+					if(httpf.debug) {
+						System.out.println("Do action now");
+					}
 					httpf.requestServer.doAction();
-					System.out.println("Do action hs finished");
-					System.out.println("\nthe response is \n" + httpf.response.getResponse());
+					if(httpf.debug) {
+						System.out.println("Do action hs finished");
+						System.out.println("\nthe response is \n" + httpf.response.getResponse());
+					}					
 					outStream.print(httpf.response.getResponse());
 					outStream.flush();
 				//	server.close();
@@ -175,6 +189,8 @@ public class Httpf {
 				if(needMore != 'y') {
 					break;
 				}
+				server.close();
+				server.close();
 			}catch(IOException e) {
 				e.printStackTrace();
 			}

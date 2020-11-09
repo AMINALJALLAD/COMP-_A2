@@ -16,7 +16,7 @@ public class Request  {
 	String urlPath;
 	ArrayList<String> paths;
 //	String header;
-	String headers;
+	ArrayList<String> headers;
 	String absouteUrl;
 	int indexOf;
 	boolean found;
@@ -37,7 +37,21 @@ public class Request  {
 		absouteUrl = "";
 		bodyRequest = "";
 //		header="";
-		headers = "";
+		headers = new ArrayList<String>();
+	}
+	
+	
+	public void clear(Response res) {  // after submission
+		response =res;
+		paths = new ArrayList<String>();
+//		message = "";
+		requestType = "";
+		version = "";
+		urlPath = "";
+		absouteUrl = "";
+		bodyRequest = "";
+//		header="";
+		headers = new ArrayList<String>();
 	}
 	
 	public String getInteger(String s) {
@@ -47,8 +61,8 @@ public class Request  {
 				strInt += s.charAt(i);
 			}
 		}
-		System.out.println("from getInteger");
-		System.out.println("strInt is " + strInt + " length " + strInt.length());
+	//	System.out.println("from getInteger");
+	//	System.out.println("strInt is " + strInt + " length " + strInt.length());
 		return strInt;
 	}
 	
@@ -65,11 +79,32 @@ public class Request  {
 	
 	public boolean isValidHeaders(String header) {
 		boolean validHeaders = true;
-		System.out.println("From isValidHeaders " + "header is " + header);
+//		if(requestType.equals("GET") && header.length()>11) {
+//			String temp = header.substring(0, 12);
+//			if( temp.equals("Content-Type") && (temp.equals("Content-Disp") ) ) {
+//				
+//		}else if (header.length()>2) {
+//		//	System.out.println("header will b");
+//			headers.add(header);
+//		}
+		if(header.length() > 2) {
+			if(requestType.equals("POST")){
+				headers.add(header);
+			}else {
+				int ind1 = header.indexOf("Content-Type");
+				int ind2 = header.indexOf("Content-Disposition");
+				if(  (ind1 < 0) && (ind2 <0) ) {
+					System.out.println("header wil be added " + header);
+					headers.add(header);
+				}
+			}
+		}
+		
+		//System.out.println("From isValidHeaders " + "header is " + header);
 		String key ="", value ="";
 		StringTokenizer stHeaders = new StringTokenizer(header);
 		if(stHeaders.hasMoreTokens()) {
-			System.out.println("header length is " + header.length());
+		//	System.out.println("header length is " + header.length());
 			key = stHeaders.nextToken(":");
 			while(stHeaders.hasMoreTokens()) {
 				value += stHeaders.nextToken();
@@ -80,17 +115,17 @@ public class Request  {
 			}
 		}
 		if(printDebugging) {
-			System.out.println("key is "+ key);
-			System.out.println("value is "+ value);
+		//	System.out.println("key is "+ key);
+		//	System.out.println("value is "+ value);
 		}
 //		System.out.println("key length is "+ key.length());
 //		System.out.println("value length is "+ value.length());
 		if(requestType.equals("POST") && key.equalsIgnoreCase("Content-Length")) {
 			value = getInteger(value);
-			System.out.println("*************************************************");
+		//	System.out.println("*************************************************");
 			bodyChar = toInteger(value);
 		}
-		System.out.println("validHeaders is " + validHeaders);
+	//	System.out.println("validHeaders is " + validHeaders);
 		return validHeaders;
 	}
 	
@@ -135,7 +170,7 @@ public class Request  {
 					}
 				}else {
 					header += (char)charNum;
-					headers += (char)charNum;
+//					headers += (char)charNum;
 //					System.out.println("header is " + header);
 //					System.out.println("header length is " + header.length());
 //					System.out.println("headers is " + headers);
@@ -163,7 +198,7 @@ public class Request  {
 //								break;
 //							}else {
 								if(printDebugging){
-									System.out.println("header is " + header);
+									System.out.println("Debug: header is " + header);
 								}
 								boolean temp = isValidHeaders(header);
 								if(header.length() <= 1
@@ -216,9 +251,9 @@ public class Request  {
 						break;
 					}
 				}
-				System.out.println("bodyRequest is " +bodyRequest);
+				//System.out.println("bodyRequest is " +bodyRequest);
 				finishPost = true;
-				System.out.println("done");
+				//System.out.println("done");
 				if(printDebugging){
 					System.out.println("The body content is " + bodyRequest);
 				}
@@ -252,6 +287,7 @@ public class Request  {
 			}
 			iteration++;
 		}
+		System.out.println("from requestline is" + printDebugging);
 		if(printDebugging){
 			System.out.println("requestType is " + requestType);
 			System.out.println("urlPath is " + urlPath);
@@ -290,12 +326,12 @@ public class Request  {
 					break;
 				}
 				
-				if(urlPath.length() > 0) {
+				if(urlPath.length() > 1) {
 					token = st.nextToken("/");
-					System.out.println("add to path");
+				//	System.out.println("add to path");
 					paths.add(token);
 				}else {
-					System.out.println("Don't tawfiq");
+				//	System.out.println("Don't tawfiq");
 					token = st.nextToken();
 				}
 				
@@ -303,7 +339,10 @@ public class Request  {
 //					paths.add(token);
 //				}
 			}
-			System.out.println(paths);
+			if(printDebugging) {
+				System.out.println("The relative path that you specify");
+				System.out.println(paths);
+			}
 		//}
 		return validPath;
 	}
@@ -350,22 +389,27 @@ public class Request  {
 				
 			}
 		}
+		if(printDebugging) {
+			System.out.println("Founf the file "+ wanted);
+		}
 		return wanted;
 	}
 	
 
 	
 	public void doAction() {
-		System.out.println("Do action");
 		File rootFile = null, wanted = null;
 		String pointerDirectory = null;
 		rootFile = new File(absouteUrl);
 		wanted = findFileDirectory(rootFile,paths,0);
 		int statusCode = -1;
-		response.addHeaders(headers);
+		for(int i=0; i<headers.size();i++) {
+			response.addHeaders(headers.get(i));
+		}
 		if(requestType.equals("GET")) {
-			getRequest = new Get(printDebugging, response);
-			statusCode = getRequest.doAction(wanted, found, rootFile);
+			//getRequest = new Get(printDebugging, response);
+			getRequest = new Get(printDebugging, response); //after submission
+			statusCode = getRequest.doAction(wanted, found, rootFile, paths);
 		}else {
 			postRequest = new Post(printDebugging);
 			statusCode = postRequest.doAction(wanted, found, rootFile, bodyRequest, indexOf, paths);
@@ -514,4 +558,6 @@ public class Request  {
 
 
 //curl localhost:8080/POST/hello.txt -d "data to be posted"
+//curl localhost:8080/Test.txtget.txt
 //curl -X POST localhost:8080/Comp339/New_folder/Lesson1/Private_file.txt -d 'to be posted'
+//curl localhost:8080/tawfiq/amin/concordia/wite.txt -d "data to be posted"
